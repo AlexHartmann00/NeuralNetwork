@@ -1,14 +1,16 @@
 package NeuralNet;
 
-import ActivationFunctions.Activation;
+import Settings.Layers.Activation.Activation;
 import DataTypes.Matrix;
+import Settings.Layers.Activation.ActivationFunction;
 
 public class InputLayer implements Layer{
-    private Matrix weights;
+    int size;
+    private ActivationFunction activation;
+    private Activation activationType;
 
     public InputLayer(int size, Activation a){
-        weights = new Matrix(size,1);
-        weights.initRandom();
+        this.size = size;
     }
 
     @Override
@@ -23,6 +25,21 @@ public class InputLayer implements Layer{
 
     @Override
     public int getNodeCount() {
-        return 0;
+        return size;
+    }
+
+    @Override
+    public Activation getActivation() {
+        return null;
+    }
+
+    @Override
+    public Matrix setWeightsChange(Matrix c) {
+        return null;
+    }
+
+    @Override
+    public Matrix getWeightsChange() {
+        return null;
     }
 }

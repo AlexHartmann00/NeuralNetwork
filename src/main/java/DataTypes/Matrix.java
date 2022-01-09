@@ -128,6 +128,23 @@ public class Matrix
         else throw new IllegalArgumentException("Dimensions do not match");
     }
 
+    public Matrix add(Matrix m2)
+    {
+        Matrix r = new Matrix(this.rows(), this.cols());
+        if (this.rows() == m2.rows() && this.cols() == m2.cols())
+        {
+            for (int i = 0; i < this.rows(); i++)
+            {
+                for (int j = 0; j < m2.cols(); j++)
+                {
+                    r.set(i, j, this.get(i, j) + m2.get(i, j));
+                }
+            }
+            return r;
+        }
+        else throw new IllegalArgumentException("Dimensions do not match");
+    }
+
     public Matrix timesScalar(float s)
     {
         Matrix m = new Matrix(nrow, ncol);

@@ -1,4 +1,4 @@
-package ActivationFunctions;
+package Settings.Layers.Activation;
 
 public enum Activation {
     RELU,

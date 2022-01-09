@@ -1,8 +1,10 @@
 package NeuralNet;
 
-import ActivationFunctions.Activation;
+import Settings.Layers.Activation.Activation;
 import DataTypes.Matrix;
 import Maths.Mathf;
+
+import java.util.ArrayList;
 
 public class NeuralNetwork
 {
@@ -15,7 +17,7 @@ public class NeuralNetwork
     private Matrix[] theta_change, theta_change_previous;
     private float accuracy = 0;
     private Activation[] activations;
-    private Layer[] layers;
+    private ArrayList<Layer> layers;
 
     public NeuralNetwork()
     {
@@ -35,8 +37,8 @@ public class NeuralNetwork
         theta3_change_previous = new Matrix(theta3.rows(), theta3.cols());
     }
 
-    public NeuralNetwork(){
-
+    public NeuralNetwork(ArrayList<Layer> layers){
+        this.layers = layers;
     }
 
     public Matrix predict(Matrix ins)
@@ -108,7 +110,7 @@ public class NeuralNetwork
 
     public void backprop(Matrix inputGrid, float[] y, float alpha)
     {
-        Matrix[] delta;
+        Matrix[] delta = new Matrix[layers.size()];
         Matrix[] grad;
         float lambda = 0.1f;
         Matrix pred = predict(inputGrid);
@@ -147,23 +149,25 @@ public class NeuralNetwork
     {
         accuracy = 0;
         float losses = 0;
-        int[] instanceIDs = Malspiel.randomIDs(features.Length);
-        theta1_change = theta1_change.scalarTimes(1 / (float)features.Length);
-        theta2_change = theta2_change.scalarTimes(1 / (float)features.Length);
-        theta3_change = theta3_change.scalarTimes(1 / (float)features.Length);
-        foreach (int j in instanceIDs)
+        int[] instanceIDs = Mathf.randomIDs(features.length);
+        for(Layer l : layers)
+            l.setWeightsChange(l.getWeightsChange().timesScalar(1 / (float)features.length));
+
+        for (int j : instanceIDs)
         {
             backprop(features[j], outputs[j], alpha);
         }
+        for(Layer l : layers)
+            l.getWeights().add(l.getWeightsChange().add(l.getWeights().timesScalar(-lambda)));//TODO: Momentum (previous change) theta1_change_previous.scalarTimes(momentum);
         theta1 += theta1_change + theta1.scalarTimes(-lambda) + theta1_change_previous.scalarTimes(momentum);
         theta2 += theta2_change + theta2.scalarTimes(-lambda) + theta2_change_previous.scalarTimes(momentum);
         theta3 += theta3_change + theta3.scalarTimes(-lambda) + theta3_change_previous.scalarTimes(momentum);
         theta1_change_previous = theta1_change;
         theta2_change_previous = theta2_change;
         theta3_change_previous = theta3_change;
-        foreach(int i in instanceIDs)
+        for(int i : instanceIDs)
         {
-            accuracy += correct(features[i], outputs[i])/(float)instanceIDs.Length;
+            accuracy += correct(features[i], outputs[i])/(float)instanceIDs.length;
             losses += loss(features[i], outputs[i]);
         }
         return losses;
@@ -332,27 +336,5 @@ public class NeuralNetwork
         //Debug.Log("Line 1 of new t2: " + theta2.toString()[0]);
         string[] t3 = File.ReadAllLines(Application.persistentDataPath + "/theta3.txt");
         theta3 = Matrix.fromStringArray(t3, theta3.rows(), theta3.cols());
-    }
-
-    public void draw(Image neuron, Canvas parentCanvas)
-    {
-        int HEIGHT = 1080;
-        int WIDTH = 1920;
-        //layer 1(input)
-        for(int i = 0; i < input.rows(); i++)
-        {
-            float xpos = 20;
-            float ypos = (input.rows() - i) * HEIGHT /(float) input.rows();
-            Image im = Object.Instantiate(neuron, new Vector3(xpos,ypos,0),Quaternion.identity,parentCanvas.transform);
-            im.rectTransform.sizeDelta = new Vector2(HEIGHT / input.rows(),WIDTH / input.rows());
-        }
-        //layer 2(hidden)
-        for (int i = 0; i < a1.cols(); i++)
-        {
-            float xpos = 0.4f * WIDTH;
-            float ypos = (a1.cols() - i) * HEIGHT / (float)a1.cols();
-            Image im = Object.Instantiate(neuron, new Vector3(xpos, ypos, 0), Quaternion.identity, parentCanvas.transform);
-            im.rectTransform.sizeDelta = new Vector2(HEIGHT / a1.cols(), WIDTH / a1.cols());
-        }
     }
 }
